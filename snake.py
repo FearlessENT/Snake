@@ -1,42 +1,28 @@
-print("running")
 import pygame
 import os
 import random
 import math
 
-
-
-
 WIN_WIDTH = 400
 WIN_HEIGHT = 400
-
-snake_img = pygame.image.load(os.path.join("square.png"))
-snake_img = pygame.transform.scale(snake_img, (10, 10))
-
-apple_img = pygame.image.load(os.path.join("red.png"))
-apple_img = pygame.transform.scale(apple_img, (10, 10))
+SPEED = 20
+FPS = 10
 
 bg_img = pygame.image.load(os.path.join("bg_img.png"))
 bg_img = pygame.transform.scale(bg_img, (WIN_WIDTH, WIN_HEIGHT))
-
-SPEED = 10
 
 
 class Snake:
 
     """class for the snake"""
 
-    speed = SPEED
-
-    sizex = SPEED
-    sizey = SPEED
-
-    snake_img = pygame.transform.scale(snake_img, (sizex, sizey))
-
-
     def __init__(self, window):
 
-        self.img = snake_img
+        self.sizex = SPEED
+        self.sizey = SPEED
+        self.speed = SPEED
+        snake_img = pygame.image.load(os.path.join("square.png"))
+        self.img = pygame.transform.scale(snake_img, (self.sizex, self.sizey))
 
         self.current_dir = "right"
         self.length = 3
@@ -49,7 +35,9 @@ class Snake:
         self.snake_y_coords = []
 
         start_coordsx = WIN_WIDTH / 2
+        start_coordsx = math.ceil(start_coordsx / float(self.speed)) * self.speed
         start_coordsy = WIN_HEIGHT / 2
+        start_coordsy = math.ceil(start_coordsx / float(self.speed)) * self.speed
 
         x = 0
         while x < self.length:
@@ -67,24 +55,20 @@ class Snake:
         self.snake_y_coords[0] = self.snake_y_coords[0] - self.speed
         self.current_dir = "up"
 
-
     def move_down(self):
         self.update_snake()
         self.snake_y_coords[0] = self.snake_y_coords[0] + self.speed
         self.current_dir = "down"
-
 
     def move_left(self):
         self.update_snake()
         self.snake_x_coords[0] = self.snake_x_coords[0] - self.speed
         self.current_dir = "left"
 
-
     def move_right(self):
         self.update_snake()
         self.snake_x_coords[0] = self.snake_x_coords[0] + self.speed
         self.current_dir = "right"
-
 
 
     def update_snake(self):
@@ -108,9 +92,6 @@ class Snake:
             currenty = self.snake_y_coords[i]
 
 
-
-
-
     def collision(self, apple_cors):
 
         temp_list_x = self.snake_x_coords.copy()
@@ -130,15 +111,13 @@ class Snake:
             if (x1 == temp_list_x[z]) and (y1 == temp_list_y[z]):
                 print("collision")
                 return "collision_snake"
-
             z += 1
 
         if (x1 == apple_cors[0]) and (y1 == apple_cors[1]):
             print("hit apple")
             return "collision_apple"
 
-
-        if (x1 == -10) or (y1 == -10) or (x1 > (WIN_WIDTH - 10)) or (y1 > WIN_HEIGHT - 10):
+        if (x1 == -self.speed) or (y1 == -self.speed) or (x1 > (WIN_WIDTH - self.speed)) or (y1 > WIN_HEIGHT - self.speed):
             print("hit edge")
             return "collision_edge"
 
@@ -162,36 +141,33 @@ class Snake:
 
 
 
-
-
-
-
-
-
 class Apple:
 
     """base class for the apple"""
 
-    sizex = SPEED
-    sizey = SPEED
+    def __init__(self, window):
 
-    def __init__(self, window, x, y):
-
-        self.x = x
-        self.y = y
+        self.sizex = SPEED
+        self.sizey = SPEED
+        apple_img = pygame.image.load(os.path.join("red.png"))
         self.img = pygame.transform.scale(apple_img, (self.sizex, self.sizey))
-        self.coords = [self.x, self.y]
+        self.relocate()
 
 
     def relocate(self):
 
-        new_x = random.randint(20, WIN_WIDTH - 20)
-        new_x = math.ceil(new_x / 10.0) * 10
-        new_y = random.randint(20, WIN_HEIGHT - 20)
-        new_y = math.ceil(new_y / 10.0) * 10
+        baseline = self.sizex * 2
+        rounder = self.sizex
+        rounder2 = float(self.sizex)
+
+        new_x = random.randint(baseline, WIN_WIDTH - baseline)
+        new_x = math.ceil(new_x / rounder2) * rounder
+        new_y = random.randint(baseline, WIN_HEIGHT - baseline)
+        new_y = math.ceil(new_y / rounder2) * rounder
         self.x = new_x
         self.y = new_y
         self.coords = [self.x, self.y]
+
 
 
     def draw(self, window):
@@ -203,20 +179,15 @@ class Apple:
 
 
 
-
-
-
 def draw_window(window, snake, apple):
 
     window.blit(bg_img, (0,0))
     snake.draw(window)
     apple.draw(window)
-
     pygame.display.update()
 
 
 def main():
-
 
     window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
@@ -224,16 +195,14 @@ def main():
     snake = Snake(window)
     snake.draw(window)
 
-    apple = Apple(window, 150, 150)
+    apple = Apple(window)
+    apple.relocate()
 
     draw_window(window, snake, apple)
 
-    fps = 20
-
     running = True
     while running:
-
-        clock.tick(fps)
+        clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -278,14 +247,6 @@ def main():
 
     pygame.quit()
     quit()
-
-
-
-
-
-
-
-
 
 
 main()
